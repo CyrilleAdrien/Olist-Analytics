@@ -1,0 +1,34 @@
+version: 2
+
+sources:
+  - name: olist
+    description: Olist CSV files loaded as text by ingestion/load_raw.py, one table per file.
+    schema: raw
+    config:
+      loaded_at_field: _loaded_at
+      freshness:
+        warn_after: {count: 1, period: day}
+        error_after: {count: 7, period: day}
+    tables:
+      - name: orders
+        description: One row per order, with its status and lifecycle timestamps.
+      - name: order_items
+        description: One row per item of an order.
+      - name: order_payments
+        description: One row per payment of an order (an order can be paid in several parts).
+      - name: order_reviews
+        description: >
+          Customer reviews. An order can have several reviews, and the same review_id can be
+          attached to several orders.
+      - name: customers
+        description: >
+          One row per customer_id. customer_id changes with every order: the person is
+          identified by customer_unique_id.
+      - name: products
+        description: One row per product, with its Portuguese category name.
+      - name: sellers
+        description: One row per seller.
+      - name: product_category_name_translation
+        description: Portuguese to English translation of the product category names.
+      - name: geolocation
+        description: Latitude and longitude of zip code prefixes. Not modelled yet.
