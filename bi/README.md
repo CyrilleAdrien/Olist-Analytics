@@ -23,7 +23,7 @@ make kpis              # reference figures
 
 | Setting | Value |
 | --- | --- |
-| Server | `localhost` (from a Windows VM on a Mac: the host IP, e.g. `10.211.55.2` with Parallels) |
+| Server | `localhost` (from a Windows VM on a Mac: the host IP, `192.168.64.1` with UTM, `10.211.55.2` with Parallels) |
 | Port | `POSTGRES_PORT` from `.env` (default `5432`) |
 | Database | `POSTGRES_DB` (default `olist`) |
 | User / password | `POSTGRES_USER` / `POSTGRES_PASSWORD` from `.env` |
