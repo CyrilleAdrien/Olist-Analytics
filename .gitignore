@@ -2,6 +2,9 @@
 data/**/*.csv
 !data/sample/*.csv
 
+# Marts snapshots for Tableau Public, rebuilt by make export
+bi/exports/
+
 # Secrets
 .env
 
