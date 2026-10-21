@@ -1,5 +1,7 @@
 # Olist Analytics
 
+[![CI](https://github.com/CyrilleAdrien/Olist-Analytics/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/CyrilleAdrien/Olist-Analytics/actions/workflows/ci.yml)
+
 Containerised analytics pipeline on the
 [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce):
 CSV ingestion in Python, a PostgreSQL warehouse, dbt models and tests, and Power BI and
@@ -68,6 +70,13 @@ make lint
 
 pre-commit runs `sqlfluff lint` (postgres dialect), `ruff`, `ruff format`, `check-yaml` and
 `end-of-file-fixer` before each commit.
+
+## Continuous integration
+
+`.github/workflows/ci.yml` runs on every pull request and on every push to `main`: it starts a
+PostgreSQL 16 service, runs `pre-commit`, the ingestion tests, loads `data/sample/`, then runs
+`dbt deps`, `dbt build` and `dbt source freshness`. The `manifest.json`, `run_results.json` and
+`sources.json` files of `dbt/target/` are published as the `dbt-target` workflow artifact.
 
 ## Data licence
 
