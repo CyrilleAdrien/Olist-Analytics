@@ -1,0 +1,25 @@
+# Data: the full Olist dataset is never committed, only the CI sample
+data/**/*.csv
+!data/sample/*.csv
+
+# Secrets
+.env
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+dbt/.user.yml
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
