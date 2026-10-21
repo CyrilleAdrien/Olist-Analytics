@@ -1,0 +1,6 @@
+# Development and CI tooling
+-r requirements.txt
+pytest~=9.1
+pre-commit~=4.7
+ruff~=0.17.1
+sqlfluff~=4.4.0
