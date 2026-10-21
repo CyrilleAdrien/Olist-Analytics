@@ -1,0 +1,240 @@
+version: 2
+
+models:
+  - name: stg_olist__orders
+    description: One row per order. Timestamps are cast from text, column names end in `_at`.
+    columns:
+      - name: order_id
+        description: Primary key.
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: Customer of this order only; see stg_olist__customers.customer_unique_id.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_olist__customers')
+                field: customer_id
+      - name: order_status
+        description: Lifecycle status of the order.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - created
+                  - approved
+                  - invoiced
+                  - processing
+                  - shipped
+                  - delivered
+                  - canceled
+                  - unavailable
+      - name: order_purchased_at
+        description: When the customer placed the order.
+        data_tests:
+          - not_null
+      - name: order_approved_at
+        description: When the payment was approved.
+      - name: order_delivered_carrier_at
+        description: When the seller handed the order to the carrier.
+      - name: order_delivered_customer_at
+        description: When the customer received the order.
+      - name: order_estimated_delivery_at
+        description: Delivery date promised to the customer at purchase.
+
+  - name: stg_olist__order_items
+    description: One row per item of an order.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - order_id
+              - order_item_id
+    columns:
+      - name: order_id
+        description: Order of the item.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_olist__orders')
+                field: order_id
+      - name: order_item_id
+        description: Position of the item in its order, from 1.
+        data_tests:
+          - not_null
+      - name: product_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_olist__products')
+                field: product_id
+      - name: seller_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_olist__sellers')
+                field: seller_id
+      - name: shipping_limit_at
+        description: Deadline for the seller to hand the item to the carrier.
+      - name: price_brl
+        description: Item price in BRL, shipping excluded.
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+      - name: freight_value_brl
+        description: Shipping cost of the item in BRL.
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+
+  - name: stg_olist__customers
+    description: >
+      One row per customer_id. Olist creates a new customer_id for every order, so the same
+      person can appear several times: customer_unique_id identifies the person.
+    columns:
+      - name: customer_id
+        description: Primary key, specific to one order.
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_unique_id
+        description: Identifier of the person across orders.
+        data_tests:
+          - not_null
+      - name: customer_zip_code_prefix
+        description: First 5 digits of the zip code, as text.
+      - name: customer_city
+      - name: customer_state
+        description: Two-letter Brazilian state code.
+
+  - name: stg_olist__products
+    description: One row per product, with its category translated into English.
+    columns:
+      - name: product_id
+        description: Primary key.
+        data_tests:
+          - unique
+          - not_null
+      - name: product_category_name
+        description: Category in Portuguese, null for 610 products.
+      - name: product_category_name_english
+        description: >
+          Category in English. Falls back to the Portuguese name when no translation exists,
+          and to 'unknown' when the product has no category.
+        data_tests:
+          - not_null
+      - name: product_name_length
+        description: Number of characters of the product name.
+      - name: product_description_length
+        description: Number of characters of the product description.
+      - name: product_photos_qty
+      - name: product_weight_g
+      - name: product_length_cm
+      - name: product_height_cm
+      - name: product_width_cm
+
+  - name: stg_olist__sellers
+    description: One row per seller.
+    columns:
+      - name: seller_id
+        description: Primary key.
+        data_tests:
+          - unique
+          - not_null
+      - name: seller_zip_code_prefix
+        description: First 5 digits of the zip code, as text.
+      - name: seller_city
+      - name: seller_state
+        description: Two-letter Brazilian state code.
+
+  - name: stg_olist__payments
+    description: One row per payment of an order.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - order_id
+              - payment_sequential
+    columns:
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_olist__orders')
+                field: order_id
+      - name: payment_sequential
+        description: Rank of the payment within the order, from 1.
+        data_tests:
+          - not_null
+      - name: payment_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [credit_card, boleto, voucher, debit_card, not_defined]
+      - name: payment_installments
+        description: Number of instalments chosen by the customer.
+      - name: payment_value_brl
+        description: Amount of this payment in BRL.
+        data_tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+
+  - name: stg_olist__reviews
+    description: >
+      One row per review and order. An order can have several reviews, and a review_id can be
+      shared by several orders, so the key is the pair (review_id, order_id).
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - review_id
+              - order_id
+    columns:
+      - name: review_id
+        data_tests:
+          - not_null
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_olist__orders')
+                field: order_id
+      - name: review_score
+        description: Score from 1 to 5.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+                quote: false
+      - name: review_comment_title
+      - name: review_comment_message
+      - name: review_created_at
+        description: When the satisfaction survey was sent to the customer.
+      - name: review_answered_at
+        description: When the customer answered the survey.
+
+  - name: stg_olist__category_translation
+    description: Portuguese to English translation of the product category names.
+    columns:
+      - name: product_category_name
+        description: Primary key, category in Portuguese.
+        data_tests:
+          - unique
+          - not_null
+      - name: product_category_name_english
+        data_tests:
+          - not_null
