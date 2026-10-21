@@ -11,7 +11,7 @@ RUN     := $(COMPOSE) run --rm pipeline
 RUN_DBT := $(COMPOSE) run --rm --workdir /app/dbt pipeline
 
 .DEFAULT_GOAL := help
-.PHONY: help up ingest build docs all down clean lint test
+.PHONY: help up ingest build docs all down clean lint test kpis export
 
 help: ## List the available commands
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(firstword $(MAKEFILE_LIST)) \
@@ -35,6 +35,13 @@ docs: .env ## Serve the dbt documentation on http://localhost:8080
 	@echo "dbt docs: http://localhost:$(DBT_DOCS_PORT)"
 
 all: up ingest build ## Chain up, ingest and build
+
+kpis: .env ## Print the reference KPIs of bi/reference_kpis.sql
+	$(COMPOSE) exec -T warehouse sh -c 'psql -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" -P pager=off' \
+		< bi/reference_kpis.sql
+
+export: .env ## Export the marts to bi/exports/*.csv for Tableau Public
+	$(COMPOSE) run --rm -v ./bi:/app/bi pipeline python bi/export_marts.py
 
 down: ## Stop every service
 	$(COMPOSE) --profile pipeline --profile docs down
