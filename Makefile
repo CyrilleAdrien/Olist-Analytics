@@ -3,6 +3,8 @@
 
 -include .env
 DBT_DOCS_PORT ?= 8080
+# Folder with the Olist CSV files, relative to the repository root (data/sample for the CI sample)
+DATA_DIR ?= data
 
 COMPOSE := docker compose
 RUN     := $(COMPOSE) run --rm pipeline
@@ -22,8 +24,8 @@ help: ## List the available commands
 up: .env ## Start the PostgreSQL warehouse
 	$(COMPOSE) up -d --wait warehouse
 
-ingest: .env ## Load the Olist CSV files into the raw schema
-	$(RUN) python ingestion/load_raw.py
+ingest: .env ## Load the Olist CSV files into the raw schema (DATA_DIR=data)
+	$(RUN) python ingestion/load_raw.py --data-dir $(DATA_DIR)
 
 build: .env ## Run dbt deps then dbt build (models + tests)
 	$(RUN_DBT) sh -c "dbt deps && dbt build"
@@ -43,5 +45,5 @@ clean: ## Stop every service and delete the warehouse volume
 lint: ## Run every pre-commit hook on the whole repository
 	pre-commit run --all-files
 
-test: .env ## Run the ingestion unit tests
+test: .env ## Run the ingestion tests (unit + load into a throwaway schema)
 	$(RUN) python -m pytest ingestion/tests
