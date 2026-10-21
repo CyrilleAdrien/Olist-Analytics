@@ -1,0 +1,59 @@
+name: olist-analytics
+
+x-db-env: &db-env
+  POSTGRES_HOST: warehouse
+  POSTGRES_PORT: 5432
+  POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+  POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+
+services:
+  warehouse:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - warehouse-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  pipeline:
+    build: .
+    image: olist-analytics-pipeline
+    environment: *db-env
+    volumes:
+      - ./data:/app/data
+      - ./ingestion:/app/ingestion
+      - ./dbt:/app/dbt
+    working_dir: /app
+    depends_on:
+      warehouse:
+        condition: service_healthy
+    profiles: ["pipeline"]
+
+  docs:
+    build: .
+    image: olist-analytics-pipeline
+    environment: *db-env
+    volumes:
+      - ./dbt:/app/dbt
+    working_dir: /app/dbt
+    command: >
+      sh -c "dbt deps && dbt docs generate && dbt docs serve --host 0.0.0.0 --port 8080 --no-browser"
+    ports:
+      - "${DBT_DOCS_PORT:-8080}:8080"
+    depends_on:
+      warehouse:
+        condition: service_healthy
+    profiles: ["docs"]
+
+volumes:
+  warehouse-data:
