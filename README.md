@@ -16,6 +16,9 @@ Tableau dashboards that show the same figures.
 
 ## Quick start
 
+Download the dataset from Kaggle and unzip the 9 CSV files into `data/` (they are git-ignored).
+Without them, `make all DATA_DIR=data/sample` runs the whole chain on the committed sample.
+
 ```bash
 git clone <this repository> && cd olist-analytics
 make all        # creates .env from .env.example if needed, then up -> ingest -> build
@@ -24,7 +27,7 @@ make all        # creates .env from .env.example if needed, then up -> ingest ->
 | Command       | Effect                                              |
 | ------------- | --------------------------------------------------- |
 | `make up`     | Start the PostgreSQL 16 warehouse (`localhost:5432`) |
-| `make ingest` | Load the Olist CSV files into the `raw` schema       |
+| `make ingest` | Load the CSV files of `DATA_DIR` (default `data/`) into the `raw` schema |
 | `make build`  | Run `dbt deps` then `dbt build`                      |
 | `make docs`   | Serve the dbt documentation on `localhost:8080`      |
 | `make all`    | Chain `up`, `ingest` and `build`                     |
@@ -32,6 +35,19 @@ make all        # creates .env from .env.example if needed, then up -> ingest ->
 | `make clean`  | Stop every service and delete the warehouse volume   |
 
 Credentials live in `.env` (never committed); `.env.example` documents every variable.
+
+## Ingestion
+
+`ingestion/load_raw.py` loads the 9 files into the `raw` schema, one table per file. Each run
+truncates and reloads every table in its own transaction, so the dbt views built on `raw` stay
+valid. Values are kept as text (zip codes keep their leading zeros) and typed in dbt staging;
+every row gets a `_loaded_at` timestamp for `dbt source freshness`. The script checks that all
+files are present and that their headers match the expected columns before loading anything.
+
+`data/sample/` holds about 1,000 orders with every linked customer, item, payment, review,
+product and seller, for the CI. It is rebuilt deterministically from the full dataset with
+`python -m ingestion.build_sample`, and it deliberately includes customers with several orders
+and orders with several reviews.
 
 ## Services
 
