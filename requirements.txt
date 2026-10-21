@@ -2,7 +2,7 @@
 pandas~=2.3
 SQLAlchemy~=2.0
 psycopg[binary]~=3.2
-dbt-core~=1.10.0
-dbt-postgres~=1.10.0
+dbt-core~=1.12.0
+dbt-postgres~=1.11.0
 # Test runner, so that `make test` runs inside the pipeline image
 pytest~=9.1
