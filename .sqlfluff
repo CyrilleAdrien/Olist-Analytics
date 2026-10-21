@@ -7,6 +7,8 @@ exclude_rules = ST06
 
 [sqlfluff:templater:jinja]
 apply_dbt_builtins = True
+# Stand-ins for the dbt package macros, so that models lint without dbt deps or a database
+library_path = sqlfluff_libs
 
 [sqlfluff:indentation]
 tab_space_size = 4

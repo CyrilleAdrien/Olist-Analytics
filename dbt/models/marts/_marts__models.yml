@@ -1,0 +1,300 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: >
+      One row per customer, identified by customer_unique_id. Olist gives a new customer_id to
+      every order, so this dimension groups all the customer_id of the same person.
+    columns:
+      - name: customer_unique_id
+        description: Primary key, identifier of the person across orders.
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_zip_code_prefix
+        description: Zip code prefix of the most recent order.
+      - name: customer_city
+        description: City of the most recent order.
+      - name: customer_state
+        description: Two-letter state code of the most recent order.
+        data_tests:
+          - not_null
+      - name: first_order_at
+        description: Purchase time of the first order, whatever its status.
+      - name: first_order_date
+        description: Purchase date of the first order, used to count new customers per month.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_dates')
+                field: date_day
+      - name: last_order_at
+        description: Purchase time of the most recent order.
+      - name: orders_count
+        description: Number of orders, all statuses.
+      - name: delivered_orders_count
+        description: Number of delivered orders.
+      - name: has_delivered_order
+        description: True when the customer has at least one delivered order.
+      - name: is_repeat_customer
+        description: "{{ doc('kpi_repeat_rate') }}"
+
+  - name: dim_products
+    description: One row per product, with its category in Portuguese and in English.
+    columns:
+      - name: product_id
+        description: Primary key.
+        data_tests:
+          - unique
+          - not_null
+      - name: product_category_name
+        description: Category in Portuguese, null when the product has none.
+      - name: product_category_name_english
+        description: >
+          Category in English. Falls back to the Portuguese name for the 2 categories without
+          translation, and to 'unknown' when the product has no category.
+        data_tests:
+          - not_null
+      - name: product_name_length
+        description: Number of characters of the product name.
+      - name: product_description_length
+        description: Number of characters of the product description.
+      - name: product_photos_qty
+        description: Number of photos of the product.
+      - name: product_weight_g
+        description: Weight in grams.
+      - name: product_length_cm
+        description: Length in centimetres.
+      - name: product_height_cm
+        description: Height in centimetres.
+      - name: product_width_cm
+        description: Width in centimetres.
+
+  - name: dim_sellers
+    description: One row per seller.
+    columns:
+      - name: seller_id
+        description: Primary key.
+        data_tests:
+          - unique
+          - not_null
+      - name: seller_zip_code_prefix
+        description: Zip code prefix of the seller.
+      - name: seller_city
+        description: City of the seller.
+      - name: seller_state
+        description: Two-letter state code of the seller.
+
+  - name: dim_dates
+    description: One row per day from 2016-01-01 to 2018-12-31, built with dbt_utils.date_spine.
+    columns:
+      - name: date_day
+        description: Primary key, the day.
+        data_tests:
+          - unique
+          - not_null
+      - name: year_number
+        description: Calendar year.
+      - name: quarter_number
+        description: Quarter, from 1 to 4.
+      - name: month_number
+        description: Month number, from 1 to 12.
+      - name: month_name
+        description: Month name in English.
+      - name: month_start
+        description: First day of the month, for monthly trends.
+      - name: iso_day_of_week
+        description: Day of the week, from 1 (Monday) to 7 (Sunday).
+      - name: day_name
+        description: Day name in English.
+      - name: is_weekend
+        description: True on Saturdays and Sundays.
+
+  - name: fct_order_items
+    description: >
+      One row per ordered item: price, freight and keys to the dimensions. Grain of the star
+      schema.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - order_id
+              - order_item_id
+    columns:
+      - name: order_item_key
+        description: Primary key, surrogate key of (order_id, order_item_id).
+        data_tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: Order of the item.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_orders')
+                field: order_id
+      - name: order_item_id
+        description: Position of the item in its order, from 1.
+        data_tests:
+          - not_null
+      - name: product_id
+        description: Product sold.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_products')
+                field: product_id
+      - name: seller_id
+        description: Seller of the item.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_sellers')
+                field: seller_id
+      - name: customer_unique_id
+        description: Customer who ordered the item.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_unique_id
+      - name: order_date
+        description: Purchase date of the order.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_dates')
+                field: date_day
+      - name: order_status
+        description: Status of the order.
+      - name: is_delivered
+        description: True when the order is delivered, the scope of every revenue KPI.
+        data_tests:
+          - not_null
+      - name: shipping_limit_at
+        description: Deadline for the seller to hand the item to the carrier.
+      - name: price_brl
+        description: "Price of the item in BRL, shipping excluded. {{ doc('kpi_revenue') }}"
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+      - name: freight_value_brl
+        description: "Shipping cost of the item in BRL. {{ doc('kpi_freight') }}"
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+
+  - name: fct_orders
+    description: >
+      One row per order: status, amounts, delivery time, late flag and review score. The
+      Power BI and Tableau dashboards read this table.
+    columns:
+      - name: order_id
+        description: "Primary key. {{ doc('kpi_orders') }}"
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: Customer identifier of this order only.
+        data_tests:
+          - not_null
+      - name: customer_unique_id
+        description: Customer who placed the order.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_unique_id
+      - name: order_status
+        description: Lifecycle status of the order.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - created
+                  - approved
+                  - invoiced
+                  - processing
+                  - shipped
+                  - delivered
+                  - canceled
+                  - unavailable
+      - name: is_delivered
+        description: True when order_status is 'delivered', the scope of every KPI.
+        data_tests:
+          - not_null
+      - name: order_purchased_at
+        description: When the customer placed the order.
+      - name: order_date
+        description: Purchase date, key to dim_dates.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_dates')
+                field: date_day
+      - name: order_approved_at
+        description: When the payment was approved.
+      - name: order_delivered_carrier_at
+        description: When the seller handed the order to the carrier.
+      - name: order_delivered_customer_at
+        description: When the customer received the order.
+      - name: order_estimated_delivery_at
+        description: Delivery date promised to the customer at purchase.
+      - name: items_count
+        description: Number of items of the order, 0 for orders without items.
+      - name: items_revenue_brl
+        description: "{{ doc('kpi_revenue') }} {{ doc('kpi_average_basket') }}"
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+      - name: freight_value_brl
+        description: "{{ doc('kpi_freight') }}"
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+      - name: payment_value_brl
+        description: Total paid by the customer in BRL, shipping and vouchers included.
+      - name: payment_count
+        description: Number of payments of the order.
+      - name: payment_installments
+        description: Largest number of instalments among the payments.
+      - name: main_payment_type
+        description: Type of the payment with the largest amount.
+      - name: review_id
+        description: Review kept for the order, the most recently answered one.
+      - name: review_score
+        description: "{{ doc('kpi_review_score') }}"
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+                quote: false
+      - name: review_count
+        description: Number of reviews the order received, 0 when none.
+      - name: delivery_days
+        description: "{{ doc('kpi_delivery_days') }}"
+        data_tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+      - name: is_late
+        description: "{{ doc('kpi_late_rate') }}"
+        data_tests:
+          - not_null

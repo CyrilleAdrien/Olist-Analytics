@@ -1,0 +1,40 @@
+version: 2
+
+models:
+  - name: int_reviews__latest_per_order
+    description: >
+      One row per reviewed order, with its most recently answered review. Ties are broken by
+      creation date, then review_id.
+    columns:
+      - name: order_id
+        description: Primary key.
+        data_tests:
+          - unique
+          - not_null
+      - name: review_id
+        description: Review kept for the order.
+      - name: review_score
+        description: Score from 1 to 5 of the review kept.
+      - name: review_created_at
+        description: When the survey of the review kept was sent.
+      - name: review_answered_at
+        description: When the review kept was answered.
+      - name: review_count
+        description: Number of reviews the order received.
+
+  - name: int_payments__per_order
+    description: One row per paid order, with its payments summed up.
+    columns:
+      - name: order_id
+        description: Primary key.
+        data_tests:
+          - unique
+          - not_null
+      - name: payment_value_brl
+        description: Total paid for the order in BRL, all payments included.
+      - name: payment_count
+        description: Number of payments of the order.
+      - name: payment_installments
+        description: Largest number of instalments among the payments of the order.
+      - name: main_payment_type
+        description: Type of the payment with the largest amount.
