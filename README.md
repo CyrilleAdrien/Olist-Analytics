@@ -195,7 +195,7 @@ three pages:
 
 `bi/README.md` gives the connection settings, the Power BI model and DAX measures, the Tableau
 data source and calculated fields, and the consistency table that compares revenue, orders,
-average basket and review score in SQL, Power BI and Tableau.
+average basket and review score in SQL, Power BI and Tableau. All three tools give the same values.
 
 ## Continuous integration
 

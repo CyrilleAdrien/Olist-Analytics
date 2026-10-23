@@ -152,10 +152,10 @@ Full dataset, delivered orders. SQL values come from `make kpis`.
 
 | KPI | SQL | Power BI | Tableau |
 | --- | ---: | ---: | ---: |
-| Revenue (BRL) | 13,221,498.11 | | |
-| Orders | 96,478 | | |
-| Average basket (BRL) | 137.04 | | |
-| Average review score | 4.16 | | |
+| Revenue (BRL) | 13,221,498.11 | 13,221,498.11 | 13,221,498.11 |
+| Orders | 96,478 | 96,478 | 96,478 |
+| Average basket (BRL) | 137.04 | 137.04 | 137.04 |
+| Average review score | 4.16 | 4.16 | 4.16 |
 
 Other reference figures: freight 2,198,275.64 BRL, average delivery time 12.50 days, late rate
 6.77 %, repeat purchase rate 3.00 %.
