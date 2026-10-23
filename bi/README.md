@@ -8,7 +8,7 @@ Power BI and Tableau read the `marts` schema only. Every KPI is computed on deli
 | `reference_kpis.sql` | Reference figures for the consistency check, run with `make kpis` |
 | `export_marts.py` | CSV export of the marts for Tableau Public, run with `make export` |
 | `powerbi/` | Power BI project (PBIP) |
-| `tableau/` | Tableau workbook (`.twbx`) |
+| `Olist-analytics.twbx` | Tableau packaged workbook |
 
 ## Prerequisites
 
@@ -135,7 +135,7 @@ Nouveaux clients    COUNTD([Customer Unique Id]), by MONTH([First Order Date])
 ```
 
 `Taux de réachat` must be computed in a sheet that uses `dim_customers` alone, so that Tableau
-counts customers and not orders. Save the workbook as `bi/tableau/olist_analytics.twbx` and
+counts customers and not orders. Save the workbook as `bi/Olist-analytics.twbx` and
 publish it to Tableau Public.
 
 ## Dashboard
