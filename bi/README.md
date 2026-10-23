@@ -8,7 +8,7 @@ Power BI and Tableau read the `marts` schema only. Every KPI is computed on deli
 | `reference_kpis.sql` | Reference figures for the consistency check, run with `make kpis` |
 | `export_marts.py` | CSV export of the marts for Tableau Public, run with `make export` |
 | `powerbi/` | Power BI project (PBIP) |
-| `tableau/` | Tableau workbook (`.twbx`) |
+| `Olist-analytics.twbx` | Tableau packaged workbook |
 
 ## Prerequisites
 
@@ -135,7 +135,7 @@ Nouveaux clients    COUNTD([Customer Unique Id]), by MONTH([First Order Date])
 ```
 
 `Taux de réachat` must be computed in a sheet that uses `dim_customers` alone, so that Tableau
-counts customers and not orders. Save the workbook as `bi/tableau/olist_analytics.twbx` and
+counts customers and not orders. Save the workbook as `bi/Olist-analytics.twbx` and
 publish it to Tableau Public.
 
 ## Dashboard
@@ -152,10 +152,10 @@ Full dataset, delivered orders. SQL values come from `make kpis`.
 
 | KPI | SQL | Power BI | Tableau |
 | --- | ---: | ---: | ---: |
-| Revenue (BRL) | 13,221,498.11 | | |
-| Orders | 96,478 | | |
-| Average basket (BRL) | 137.04 | | |
-| Average review score | 4.16 | | |
+| Revenue (BRL) | 13,221,498.11 | 13,221,498.11 | 13,221,498.11 |
+| Orders | 96,478 | 96,478 | 96,478 |
+| Average basket (BRL) | 137.04 | 137.04 | 137.04 |
+| Average review score | 4.16 | 4.16 | 4.16 |
 
 Other reference figures: freight 2,198,275.64 BRL, average delivery time 12.50 days, late rate
 6.77 %, repeat purchase rate 3.00 %.
