@@ -27,20 +27,9 @@ questions, with the same numbers in every tool:
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    csv["9 Olist CSV files<br/>data/"] -->|"make ingest<br/>ingestion/load_raw.py"| raw[("raw<br/>text tables")]
-    subgraph warehouse["PostgreSQL 16 (Docker)"]
-        raw -->|dbt views| stg[("staging<br/>typed, cleaned")]
-        stg -->|dbt views| int[("intermediate<br/>one row per order")]
-        int -->|dbt tables| marts[("marts<br/>star schema")]
-        stg --> marts
-    end
-    marts --> pbi["Power BI"]
-    marts --> tab["Tableau"]
-    marts -->|make export| csvx["bi/exports/*.csv"]
-    ci["GitHub Actions"] -.->|"data/sample + dbt build"| warehouse
-```
+![Olist Analytics architecture](docs/olist-architecture.svg)
+
+The editable source is [docs/olist-architecture.drawio](docs/olist-architecture.drawio) (open it on [draw.io](https://app.diagrams.net)).
 
 | Layer | Tool | Schema | Materialisation |
 | --- | --- | --- | --- |
