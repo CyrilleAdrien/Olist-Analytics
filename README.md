@@ -40,6 +40,10 @@ from scratch with a single `make all`.
 - 📊 **One truth, three tools.** SQL, Power BI and Tableau return the same revenue, orders, basket and score.
 - 📚 **Documented.** Every column and KPI is described in the dbt docs (`make docs`).
 
+<p align="center">
+  <img src="docs/assets/tableau-overview.png" alt="Tableau overview dashboard" width="900">
+</p>
+
 ## Context
 
 Olist is a Brazilian marketplace that connects small sellers to the large e-commerce
@@ -208,6 +212,17 @@ three pages:
 | Overview | KPI cards (revenue, orders, average basket, average review score), monthly revenue, top 10 categories |
 | Logistics | Average delivery time, late rate by customer state, review score on time vs late |
 | Customers | Repeat purchase rate, customers by state, new customers per month |
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/assets/tableau-overview.png" alt="Overview page"><p align="center"><b>Overview</b></p></td>
+    <td width="50%"><img src="docs/assets/tableau-logistics.png" alt="Logistics page"><p align="center"><b>Logistics</b></p></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/assets/tableau-customers.png" alt="Customers page"><p align="center"><b>Customers</b></p></td>
+    <td width="50%"><img src="docs/assets/tableau-data-model.png" alt="Tableau data model"><p align="center"><b>Tableau data model on the marts</b></p></td>
+  </tr>
+</table>
 
 - **Tableau**: packaged workbook `bi/Olist-analytics.twbx`, opens in Tableau Desktop or Tableau
   Reader without a database.
