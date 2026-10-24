@@ -1,12 +1,44 @@
-# Olist Analytics
+<p align="center">
+  <img src="docs/assets/banner.svg" alt="Olist Analytics">
+</p>
 
-[![CI](https://github.com/CyrilleAdrien/Olist-Analytics/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/CyrilleAdrien/Olist-Analytics/actions/workflows/ci.yml)
+<p align="center">
+  <em>From 9 raw CSV files to a tested star schema and two BI dashboards that agree to the cent,
+  rebuilt from scratch with a single command.</em>
+</p>
 
-End-to-end analytics project on the
+<p align="center">
+  <a href="https://github.com/CyrilleAdrien/Olist-Analytics/actions/workflows/ci.yml"><img src="https://github.com/CyrilleAdrien/Olist-Analytics/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
+  <img src="https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white" alt="Python 3.12">
+  <img src="https://img.shields.io/badge/dbt-1.12-FF694B?logo=dbt&logoColor=white" alt="dbt 1.12">
+  <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL 16">
+  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" alt="Docker Compose">
+  <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><img src="https://img.shields.io/badge/data-CC%20BY--NC--SA%204.0-lightgrey" alt="Data licence"></a>
+</p>
+
+<p align="center">
+  <a href="#architecture"><img src="https://img.shields.io/badge/Architecture-View-336791?style=for-the-badge" alt="Architecture"></a>
+  <a href="#quick-start"><img src="https://img.shields.io/badge/Quick%20start-Run-16A34A?style=for-the-badge" alt="Quick start"></a>
+  <a href="#results"><img src="https://img.shields.io/badge/Results-KPIs-F97316?style=for-the-badge" alt="Results"></a>
+  <a href="#dashboards"><img src="https://img.shields.io/badge/Dashboards-Power%20BI%20%26%20Tableau-E97627?style=for-the-badge" alt="Dashboards"></a>
+</p>
+
+## What is Olist Analytics?
+
+An end-to-end analytics engineering project on the
 [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce):
 CSV ingestion in Python, a PostgreSQL warehouse, dbt models and tests, and Power BI and
 Tableau dashboards that show the same figures. The whole pipeline runs in Docker and is rebuilt
 from scratch with a single `make all`.
+
+## Key features
+
+- 🐳 **Reproducible.** One `make all` starts PostgreSQL in Docker, loads the raw files and builds every model.
+- 🧱 **Layered dbt project.** `raw` → `staging` → `intermediate` → `marts`, ending in a star schema.
+- ✅ **Tested data.** 94 data tests plus a revenue reconciliation test between the two fact tables.
+- 🔁 **CI on every pull request.** Lint, unit tests, a sample load and `dbt build` in GitHub Actions.
+- 📊 **One truth, three tools.** SQL, Power BI and Tableau return the same revenue, orders, basket and score.
+- 📚 **Documented.** Every column and KPI is described in the dbt docs (`make docs`).
 
 ## Context
 
@@ -230,3 +262,12 @@ pre-commit runs `sqlfluff lint` (postgres dialect), `ruff`, `ruff format`, `chec
 
 The Olist dataset is published under
 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+
+## 📢 Author
+
+**Cyrille FOTSO**, Data Engineer / DataOps.
+
+<p>
+  <a href="https://www.linkedin.com/in/cyrille-fotso-a25609428/"><img src="https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin" alt="LinkedIn"></a>
+  <a href="https://github.com/CyrilleAdrien"><img src="https://img.shields.io/badge/GitHub-CyrilleAdrien-181717?style=for-the-badge&logo=github" alt="GitHub"></a>
+</p>
