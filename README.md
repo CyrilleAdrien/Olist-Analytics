@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <em>From 9 raw CSV files to a tested star schema and two BI dashboards that agree to the cent,
+  <em>From 9 raw CSV files to a tested star schema and two BI dashboards whose headline KPIs agree to the cent,
   rebuilt from scratch with a single command.</em>
 </p>
 
@@ -28,7 +28,7 @@
 An end-to-end analytics engineering project on the
 [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce):
 CSV ingestion in Python, a PostgreSQL warehouse, dbt models and tests, and Power BI and
-Tableau dashboards that show the same figures. The whole pipeline runs in Docker and is rebuilt
+Tableau dashboards that show the same headline figures. The whole pipeline runs in Docker and is rebuilt
 from scratch with a single `make all`.
 
 ## Key features
@@ -54,7 +54,7 @@ translations and geolocation.
 The raw files are not ready for reporting: an order can have several items, payments and
 reviews, a customer gets a new `customer_id` for every order, and dates and amounts are stored
 as text. The goal of the project is a tested, documented model that answers four business
-questions, with the same numbers in every tool:
+questions, with the same headline numbers in every tool:
 
 - How much does the marketplace sell, and in which categories?
 - How many orders, and what is the average basket?
@@ -165,7 +165,7 @@ dataset. Every column and KPI is documented in `make docs`.
 ## KPI definitions
 
 Every KPI is computed on delivered orders (`is_delivered = true`). The definitions live in
-`dbt/models/marts/_kpi_docs.md`, and the same rules are used in SQL, DAX and Tableau.
+`dbt/models/marts/_kpi_docs.md` and are the reference for SQL, DAX and Tableau.
 
 | KPI | Definition |
 | --- | --- |
@@ -231,7 +231,9 @@ three pages:
 
 `bi/README.md` gives the connection settings, the Power BI model and DAX measures, the Tableau
 data source and calculated fields, and the consistency table that compares revenue, orders,
-average basket and review score in SQL, Power BI and Tableau. All three tools give the same values.
+average basket and review score in SQL, Power BI and Tableau. All three tools give the same values
+for these four KPIs. The repeat purchase rate is the exception: Tableau shows 2.90 % against
+3.00 % in SQL, because its calculation does not use exactly the same customer base.
 
 ## Continuous integration
 
@@ -272,6 +274,8 @@ pre-commit runs `sqlfluff lint` (postgres dialect), `ruff`, `ruff format`, `chec
 - The warehouse is rebuilt in full on each run; incremental models would be the next step for
   a live source.
 - Geolocation is not modelled; delivery distance could explain part of the delays.
+- The repeat purchase rate differs slightly between SQL (3.00 %) and Tableau (2.90 %); the
+  Tableau calculation should be aligned on the dbt definition.
 
 ## Data licence
 
